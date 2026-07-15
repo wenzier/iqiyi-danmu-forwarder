@@ -1,0 +1,204 @@
+/*
+ * 爱奇艺实时弹幕转发器 (iQiyi Danmu Forwarder) 浮动面板样式
+ * Copyright (C) 2026 wenzier
+ * Licensed under the GNU General Public License v3.0 or later.
+ */
+#iqdf-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 280px;
+  z-index: 2147483647;
+  background: rgba(24, 24, 28, 0.94);
+  color: #f2f2f5;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  user-select: none;
+}
+
+#iqdf-panel * {
+  box-sizing: border-box;
+}
+
+#iqdf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: move;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#iqdf-title {
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iqdf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00c250;
+  display: inline-block;
+}
+
+.iqdf-dot.off {
+  background: #888;
+}
+
+.iqdf-hbtn {
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+}
+
+.iqdf-hbtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+#iqdf-body {
+  padding: 12px;
+}
+
+#iqdf-panel.iqdf-collapsed #iqdf-body,
+#iqdf-panel.iqdf-collapsed #iqdf-footer {
+  display: none;
+}
+
+.iqdf-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.iqdf-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.iqdf-lbl {
+  color: #b8b8be;
+  font-size: 12px;
+}
+
+.iqdf-input-num {
+  width: 58px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+}
+
+.iqdf-input-num:focus {
+  border-color: #00c250;
+}
+
+.iqdf-input-text {
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 11px;
+  outline: none;
+}
+
+.iqdf-input-text:focus {
+  border-color: #00c250;
+}
+
+.iqdf-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.iqdf-check input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #00c250;
+  cursor: pointer;
+}
+
+.iqdf-check .iqdf-input-num {
+  width: 46px;
+  padding: 4px 6px;
+}
+
+.iqdf-btn {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  background: #00c250;
+  color: #fff;
+}
+
+.iqdf-btn:hover {
+  background: #00a844;
+}
+
+.iqdf-btn.secondary {
+  background: rgba(255, 255, 255, 0.14);
+  color: #eee;
+}
+
+.iqdf-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+#iqdf-status {
+  font-size: 11px;
+  color: #888;
+  text-align: center;
+  min-height: 15px;
+  margin-top: 8px;
+  word-break: break-all;
+}
+
+#iqdf-status.ok {
+  color: #00c250;
+}
+
+#iqdf-status.warn {
+  color: #ffb020;
+}
+
+#iqdf-status.err {
+  color: #ff6b6b;
+}
+
+#iqdf-footer {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 0.5px;
+}

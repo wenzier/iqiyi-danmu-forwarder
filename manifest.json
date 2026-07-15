@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "爱奇艺实时弹幕转发器",
+  "version": "1.0.0",
+  "author": "wenzier",
+  "description": "在爱奇艺网页版视频中定时抓取屏幕上的实时弹幕并原样再发。Copyright (C) 2026 wenzier, licensed under GPL-3.0-or-later.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.iqiyi.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["panel.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "爱奇艺实时弹幕转发器（面板在视频页右下角）"
+  }
+}
