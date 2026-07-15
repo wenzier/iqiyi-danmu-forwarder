@@ -5,6 +5,11 @@
   "author": "wenzier",
   "description": "在爱奇艺网页版视频中定时抓取屏幕上的实时弹幕并原样再发。Copyright (C) 2026 wenzier, licensed under GPL-3.0-or-later.",
   "permissions": ["storage"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -16,6 +21,11 @@
     }
   ],
   "action": {
-    "default_title": "爱奇艺实时弹幕转发器（面板在视频页右下角）"
+    "default_title": "爱奇艺实时弹幕转发器（面板在视频页右下角）",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   }
 }

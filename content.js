@@ -433,7 +433,7 @@
     ]);
 
     panel = h('div', { id: 'iqdf-panel' }, [header, body,
-      h('div', { id: 'iqdf-footer', text: 'by wenzier' })
+      h('div', { id: 'iqdf-footer', text: 'by wenzier(雀骨专用)' })
     ]);
     if (settings.collapsed) { panel.classList.add('iqdf-collapsed'); collapseBtn.textContent = '＋'; }
     document.body.appendChild(panel);
