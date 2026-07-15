@@ -34,7 +34,10 @@
     collapsed: false,
     inputSelector: '',        // 自定义“弹幕输入框”选择器（发送兜底）
     forward: {
-      interval: 20,           // 转发间隔（秒）
+      intervalMode: 'fixed',  // fixed 固定 | random 范围随机
+      interval: 20,           // 固定模式：转发间隔（秒）
+      intervalMin: 15,        // 随机模式：最小间隔（秒）
+      intervalMax: 30,        // 随机模式：最大间隔（秒）
       maxLen: 20,             // 跳过超过此长度的弹幕
       dedup: true,            // 短时间内不重复转发同一条
       skipAbnormal: true,     // 跳过含网址/纯表情/特殊字符的弹幕
@@ -229,9 +232,21 @@
   }
 
   /* -------------- 转发循环控制 -------------- */
+  // 计算下一轮的间隔秒数：固定模式取定值，随机模式在 [min, max] 内随机
+  function nextIntervalSec() {
+    const f = settings.forward;
+    if (f.intervalMode === 'random') {
+      let min = Math.max(MIN_INTERVAL, Number(f.intervalMin) || MIN_INTERVAL);
+      let max = Math.max(MIN_INTERVAL, Number(f.intervalMax) || MIN_INTERVAL);
+      if (min > max) { const t = min; min = max; max = t; } // 顺手纠正反了的范围
+      return min + Math.random() * (max - min);
+    }
+    return Math.max(MIN_INTERVAL, Number(f.interval) || MIN_INTERVAL);
+  }
+
+  // 用 setTimeout 递归而非 setInterval，因为每轮延迟可能不同（随机模式）
   function startForward() {
     stopForward();
-    const sec = Math.max(MIN_INTERVAL, Number(settings.forward.interval) || MIN_INTERVAL);
     const fire = () => {
       const picked = pickLiveDanmu();
       if (picked) {
@@ -242,14 +257,15 @@
       } else {
         setStatus('本轮未抓到可转发的实时弹幕', 'warn');
       }
+      // 发完再排下一轮，用新的（可能随机的）延迟
+      forwardTimer = setTimeout(fire, nextIntervalSec() * 1000);
     };
     fire();
-    forwardTimer = setInterval(fire, sec * 1000);
     updateUI();
   }
 
   function stopForward() {
-    if (forwardTimer) { clearInterval(forwardTimer); forwardTimer = null; }
+    if (forwardTimer) { clearTimeout(forwardTimer); forwardTimer = null; }
     updateUI();
   }
 
@@ -298,12 +314,60 @@
   function buildPanel() {
     const f = settings.forward;
 
+    // 固定间隔输入
     const interval = h('input', { class: 'iqdf-input-num', type: 'number', min: String(MIN_INTERVAL), value: String(f.interval) });
     interval.addEventListener('change', () => {
       let v = Math.floor(Number(interval.value));
       if (!(v >= MIN_INTERVAL)) { v = MIN_INTERVAL; setStatus('最小间隔 ' + MIN_INTERVAL + ' 秒', 'warn'); }
       f.interval = v; interval.value = String(v); saveSettings();
       if (forwardTimer) startForward();
+    });
+
+    // 随机范围输入（min ~ max）
+    const clampSec = (n) => { n = Math.floor(Number(n)); return n >= MIN_INTERVAL ? n : MIN_INTERVAL; };
+    const intMin = h('input', { class: 'iqdf-input-num', type: 'number', min: String(MIN_INTERVAL), value: String(f.intervalMin) });
+    const intMax = h('input', { class: 'iqdf-input-num', type: 'number', min: String(MIN_INTERVAL), value: String(f.intervalMax) });
+    const saveRange = () => {
+      f.intervalMin = clampSec(intMin.value);
+      f.intervalMax = clampSec(intMax.value);
+      intMin.value = String(f.intervalMin);
+      intMax.value = String(f.intervalMax);
+      if (f.intervalMin > f.intervalMax) setStatus('最小值大于最大值，已按较小值先发', 'warn');
+      saveSettings();
+      if (forwardTimer) startForward();
+    };
+    intMin.addEventListener('change', saveRange);
+    intMax.addEventListener('change', saveRange);
+
+    // 固定 / 随机 两种间隔行
+    const fixedRow = h('div', { class: 'iqdf-row' }, [
+      h('span', { class: 'iqdf-lbl', text: '每' }), interval,
+      h('span', { class: 'iqdf-lbl', text: '秒抓一条转发' })
+    ]);
+    const randomRow = h('div', { class: 'iqdf-row' }, [
+      h('span', { class: 'iqdf-lbl', text: '每' }), intMin,
+      h('span', { class: 'iqdf-lbl', text: '~' }), intMax,
+      h('span', { class: 'iqdf-lbl', text: '秒随机抓一条' })
+    ]);
+
+    // 模式切换
+    const applyMode = () => {
+      const isRandom = f.intervalMode === 'random';
+      fixedRow.style.display = isRandom ? 'none' : 'flex';
+      randomRow.style.display = isRandom ? 'flex' : 'none';
+      modeSwitch.querySelectorAll('.iqdf-mode-opt').forEach((o) => {
+        o.classList.toggle('active', o.getAttribute('data-m') === f.intervalMode);
+      });
+    };
+    const modeSwitch = h('div', { class: 'iqdf-mode-switch' }, [
+      h('div', { class: 'iqdf-mode-opt', 'data-m': 'fixed', text: '固定间隔' }),
+      h('div', { class: 'iqdf-mode-opt', 'data-m': 'random', text: '随机间隔' })
+    ]);
+    modeSwitch.querySelectorAll('.iqdf-mode-opt').forEach((o) => {
+      o.addEventListener('click', () => {
+        f.intervalMode = o.getAttribute('data-m'); saveSettings(); applyMode();
+        if (forwardTimer) startForward();
+      });
     });
 
     const maxLen = h('input', { class: 'iqdf-input-num', type: 'number', min: '0', value: String(f.maxLen) });
@@ -338,10 +402,9 @@
     elStatus = h('div', { id: 'iqdf-status' });
 
     const body = h('div', { id: 'iqdf-body' }, [
-      h('div', { class: 'iqdf-row' }, [
-        h('span', { class: 'iqdf-lbl', text: '每' }), interval,
-        h('span', { class: 'iqdf-lbl', text: '秒抓一条实时弹幕转发' })
-      ]),
+      h('div', { class: 'iqdf-row' }, [ modeSwitch ]),
+      fixedRow,
+      randomRow,
       h('div', { class: 'iqdf-row' }, [
         mkCheck('dedup', '避免重复'),
         h('label', { class: 'iqdf-check' }, [h('span', { text: '最长' }), maxLen, h('span', { text: '字' })])
@@ -382,6 +445,7 @@
     }
 
     makeDraggable(panel, header);
+    applyMode();   // 按当前模式显示固定/随机行
     updateUI();
     if (f.enabled) startForward(); // 恢复上次运行态
   }
